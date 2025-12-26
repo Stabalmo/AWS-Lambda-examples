@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "lambda-example-dev"
+resolve_s3 = true
+s3_prefix = "lambda-example-dev"
+region = "eu-north-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "StageName=\"dev\" AuthTokenSsmParamName=\"/lambda-example/dev/auth-token\""
+image_repositories = []
+
+[default.global.parameters]
+region = "eu-north-1"
