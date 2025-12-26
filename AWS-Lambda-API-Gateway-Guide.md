@@ -97,7 +97,7 @@ aws configure
 Enter when prompted:
 - **AWS Access Key ID**: `<your-access-key>`
 - **AWS Secret Access Key**: `<your-secret-key>`
-- **Default region name**: `us-east-1` (or your preferred region)
+- **Default region name**: `eu-north-1` (or your preferred region)
 - **Default output format**: `json`
 
 ### 2.3 Verify Configuration
@@ -155,7 +155,17 @@ If you want minimal permissions, follow these steps:
 1. In AWS Console → IAM → **Policies** (left sidebar)
 2. Click **"Create policy"**
 3. Click the **JSON** tab
-4. **Paste this policy** (replace `YOUR_ACCOUNT_ID` and `YOUR_REGION`):
+4. **Use this policy file** (replace `YOUR_ACCOUNT_ID` and `YOUR_REGION` inside it):
+
+- `iam/lambda-example-deploy-policy.json`
+
+If you want to create the policy from CLI:
+
+```bash
+aws iam create-policy \
+  --policy-name LambdaExampleDeployPolicy \
+  --policy-document file://iam/lambda-example-deploy-policy.json
+```
 
 **What this policy allows:**
 - ✅ Create/manage SSM parameters under `/lambda-example/*`
@@ -168,159 +178,11 @@ If you want minimal permissions, follow these steps:
 - ✅ Send traces to X-Ray
 - ✅ Store SAM deployment artifacts in S3
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "SSMParameterAccess",
-      "Effect": "Allow",
-      "Action": [
-        "ssm:PutParameter",
-        "ssm:GetParameter",
-        "ssm:GetParameters",
-        "ssm:DeleteParameter",
-        "ssm:DescribeParameters"
-      ],
-      "Resource": [
-        "arn:aws:ssm:YOUR_REGION:YOUR_ACCOUNT_ID:parameter/lambda-example/*"
-      ]
-    },
-    {
-      "Sid": "LambdaManagement",
-      "Effect": "Allow",
-      "Action": [
-        "lambda:*"
-      ],
-      "Resource": [
-        "arn:aws:lambda:YOUR_REGION:YOUR_ACCOUNT_ID:function:lambda-example-*"
-      ]
-    },
-    {
-      "Sid": "APIGatewayManagement",
-      "Effect": "Allow",
-      "Action": [
-        "apigateway:*"
-      ],
-      "Resource": [
-        "arn:aws:apigateway:YOUR_REGION::/*"
-      ]
-    },
-    {
-      "Sid": "DynamoDBManagement",
-      "Effect": "Allow",
-      "Action": [
-        "dynamodb:*"
-      ],
-      "Resource": [
-        "arn:aws:dynamodb:YOUR_REGION:YOUR_ACCOUNT_ID:table/lambda-example-*"
-      ]
-    },
-    {
-      "Sid": "CloudFormationManagement",
-      "Effect": "Allow",
-      "Action": [
-        "cloudformation:*"
-      ],
-      "Resource": [
-        "arn:aws:cloudformation:YOUR_REGION:YOUR_ACCOUNT_ID:stack/lambda-example-*/*",
-        "arn:aws:cloudformation:YOUR_REGION:YOUR_ACCOUNT_ID:stack/aws-sam-cli-managed-default/*"
-      ]
-    },
-    {
-      "Sid": "CloudFormationGlobal",
-      "Effect": "Allow",
-      "Action": [
-        "cloudformation:ListStacks",
-        "cloudformation:ValidateTemplate",
-        "cloudformation:CreateChangeSet",
-        "cloudformation:DescribeChangeSet",
-        "cloudformation:ExecuteChangeSet",
-        "cloudformation:DeleteChangeSet"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "IAMRoleManagement",
-      "Effect": "Allow",
-      "Action": [
-        "iam:CreateRole",
-        "iam:DeleteRole",
-        "iam:GetRole",
-        "iam:PassRole",
-        "iam:AttachRolePolicy",
-        "iam:DetachRolePolicy",
-        "iam:PutRolePolicy",
-        "iam:DeleteRolePolicy",
-        "iam:GetRolePolicy",
-        "iam:TagRole",
-        "iam:UntagRole",
-        "iam:GetPolicy",
-        "iam:GetPolicyVersion"
-      ],
-      "Resource": [
-        "arn:aws:iam::YOUR_ACCOUNT_ID:role/lambda-example-*",
-        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-        "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess",
-        "arn:aws:iam::YOUR_ACCOUNT_ID:policy/*"
-      ]
-    },
-    {
-      "Sid": "CloudWatchLogsAccess",
-      "Effect": "Allow",
-      "Action": [
-        "logs:*"
-      ],
-      "Resource": [
-        "arn:aws:logs:YOUR_REGION:YOUR_ACCOUNT_ID:log-group:/aws/lambda/lambda-example-*",
-        "arn:aws:logs:YOUR_REGION:YOUR_ACCOUNT_ID:log-group:/aws/lambda/lambda-example-*:*"
-      ]
-    },
-    {
-      "Sid": "XRayAccess",
-      "Effect": "Allow",
-      "Action": [
-        "xray:PutTraceSegments",
-        "xray:PutTelemetryRecords"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "S3ForSAMArtifacts",
-      "Effect": "Allow",
-      "Action": [
-        "s3:CreateBucket",
-        "s3:DeleteBucket",
-        "s3:ListBucket",
-        "s3:GetBucketLocation",
-        "s3:GetBucketVersioning",
-        "s3:PutBucketVersioning",
-        "s3:PutBucketTagging",
-        "s3:GetBucketTagging",
-        "s3:PutBucketPublicAccessBlock",
-        "s3:GetBucketPublicAccessBlock",
-        "s3:PutEncryptionConfiguration",
-        "s3:GetEncryptionConfiguration",
-        "s3:PutBucketPolicy",
-        "s3:GetBucketPolicy",
-        "s3:DeleteBucketPolicy",
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:DeleteObject",
-        "s3:ListBucketVersions"
-      ],
-      "Resource": [
-        "arn:aws:s3:::aws-sam-cli-managed-default-*",
-        "arn:aws:s3:::aws-sam-cli-managed-default-*/*"
-      ]
-    }
-  ]
-}
-```
+**Policy JSON:** see `iam/lambda-example-deploy-policy.json` (edit `YOUR_ACCOUNT_ID` and `YOUR_REGION` there).
 
 5. **Replace placeholders**:
    - Replace `YOUR_ACCOUNT_ID` with your AWS account ID (find it from `aws sts get-caller-identity`)
-   - Replace `YOUR_REGION` with your region (e.g., `eu-north-1`, `us-east-1`)
+   - Replace `YOUR_REGION` with your region (e.g., `us-east-1`, `eu-north-1`)
 
 6. **Name the policy**:
    - Click **"Next"**
@@ -591,7 +453,7 @@ sam deploy --guided
 Answer the prompts:
 
 - **Stack Name**: `lambda-example-dev` (or your choice)
-- **AWS Region**: `us-east-1` (or your chosen region)
+- **AWS Region**: `eu-north-1` (or your chosen region)
 - **Parameter StageName**: `dev` (press Enter for default)
 - **Parameter AuthTokenParamName**: `/lambda-example/dev/auth-token` (press Enter for default)
 - **Confirm changes before deploy**: `N`
@@ -609,7 +471,7 @@ The deployment will take 2-5 minutes. You'll see:
 ```
 CloudFormation stack changeset
 ...
-Successfully created/updated stack - lambda-example-dev in us-east-1
+Successfully created/updated stack - lambda-example-dev in eu-north-1
 ```
 
 ### 6.3 Get Your API URL
@@ -619,7 +481,7 @@ After deployment completes, look for the **Outputs** section:
 ```
 Key                 ApiUrl
 Description         API Gateway endpoint URL
-Value               https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/dev
+Value               https://xxxxxxxxxx.execute-api.eu-north-1.amazonaws.com/dev
 ```
 
 **Save this URL!**
@@ -642,7 +504,7 @@ aws cloudformation describe-stacks \
 
 ```bash
 # Replace with your actual values
-export API_URL="https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/dev"
+export API_URL="https://xxxxxxxxxx.execute-api.eu-north-1.amazonaws.com/dev"
 export AUTH_TOKEN="<your-token-from-step-4>"
 ```
 
@@ -875,7 +737,7 @@ aws ssm put-parameter \
   --type SecureString \
   --value "$PROD_TOKEN" \
   --overwrite \
-  --region us-east-1
+  --region $REGION
 ```
 
 ### 12.2 Deploy Production Stack
@@ -895,7 +757,7 @@ sam deploy \
 ```bash
 aws cloudformation describe-stacks \
   --stack-name lambda-example-prod \
-  --region us-east-1 \
+  --region $REGION \
   --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
   --output text
 ```
@@ -910,14 +772,14 @@ aws cloudformation describe-stacks \
 ```bash
 aws cloudformation delete-stack \
   --stack-name lambda-example-dev \
-  --region us-east-1
+  --region $REGION
 ```
 
 **Prod environment (if created):**
 ```bash
 aws cloudformation delete-stack \
   --stack-name lambda-example-prod \
-  --region us-east-1
+  --region $REGION
 ```
 
 ### 13.2 Wait for Deletion
@@ -925,7 +787,7 @@ aws cloudformation delete-stack \
 ```bash
 aws cloudformation wait stack-delete-complete \
   --stack-name lambda-example-dev \
-  --region us-east-1
+  --region $REGION
 ```
 
 ### 13.3 Delete SAM Managed Stack (Optional)
@@ -935,12 +797,12 @@ SAM CLI creates a managed stack for deployment artifacts. You can delete it too:
 ```bash
 aws cloudformation delete-stack \
   --stack-name aws-sam-cli-managed-default \
-  --region us-east-1
+  --region $REGION
 
 # Wait for deletion
 aws cloudformation wait stack-delete-complete \
   --stack-name aws-sam-cli-managed-default \
-  --region us-east-1
+  --region $REGION
 ```
 
 ### 13.4 Delete SSM Parameters
@@ -948,19 +810,19 @@ aws cloudformation wait stack-delete-complete \
 ```bash
 aws ssm delete-parameter \
   --name /lambda-example/dev/auth-token \
-  --region us-east-1
+  --region $REGION
 
 # If you created prod:
 aws ssm delete-parameter \
   --name /lambda-example/prod/auth-token \
-  --region us-east-1
+  --region $REGION
 ```
 
 ### 13.5 Verify Cleanup
 
 ```bash
 aws cloudformation list-stacks \
-  --region us-east-1 \
+  --region $REGION \
   --query "StackSummaries[?StackName=='lambda-example-dev'].StackStatus"
 ```
 
@@ -995,12 +857,12 @@ This happens when a previous deployment failed partway through.
 # Delete the failed stack
 aws cloudformation delete-stack \
   --stack-name aws-sam-cli-managed-default \
-  --region eu-north-1
+  --region $REGION
 
 # Wait for deletion to complete
 aws cloudformation wait stack-delete-complete \
   --stack-name aws-sam-cli-managed-default \
-  --region eu-north-1
+  --region $REGION
 
 # Now retry deployment
 sam deploy --guided
@@ -1011,7 +873,7 @@ sam deploy --guided
 # Check what resources are causing issues
 aws cloudformation describe-stack-events \
   --stack-name aws-sam-cli-managed-default \
-  --region eu-north-1 \
+  --region $REGION \
   --query 'StackEvents[?ResourceStatus==`DELETE_FAILED`].[LogicalResourceId,ResourceStatusReason]' \
   --output table
 
@@ -1027,12 +889,12 @@ aws cloudformation describe-stack-events \
 # Delete your application stack
 aws cloudformation delete-stack \
   --stack-name lambda-example-dev \
-  --region eu-north-1
+  --region $REGION
 
 # Wait for deletion
 aws cloudformation wait stack-delete-complete \
   --stack-name lambda-example-dev \
-  --region eu-north-1
+  --region $REGION
 ```
 
 ### Issue: 500 Internal Server Error on authenticated endpoints (POST /items)
@@ -1058,12 +920,12 @@ AuthorizerInvokePermission:
 # Get your authorizer function name
 AUTH_FUNC=$(aws cloudformation describe-stack-resources \
   --stack-name lambda-example-dev \
-  --region eu-north-1 \
+  --region $REGION \
   --query 'StackResources[?LogicalResourceId==`AuthorizerFunction`].PhysicalResourceId' \
   --output text)
 
 # Check if permission exists (should NOT return ResourceNotFoundException)
-aws lambda get-policy --function-name $AUTH_FUNC --region eu-north-1
+aws lambda get-policy --function-name $AUTH_FUNC --region $REGION
 ```
 
 ### Issue: "Decimal is not JSON serializable" error in logs
@@ -1096,7 +958,7 @@ json.dumps(data, default=_decimal_default)
 2. **Authorizer not attached to routes** - Verify routes have authorizer:
    ```bash
    API_ID="<your-api-id>"
-   aws apigatewayv2 get-routes --api-id $API_ID --region eu-north-1 \
+   aws apigatewayv2 get-routes --api-id $API_ID --region $REGION \
      --query 'Items[].[RouteKey,AuthorizationType,AuthorizerId]' --output table
    ```
    Should show `CUSTOM` authorization type for protected routes
@@ -1108,19 +970,19 @@ json.dumps(data, default=_decimal_default)
 **Solutions:**
 1. Check token matches SSM parameter:
    ```bash
-   aws ssm get-parameter --name /lambda-example/dev/auth-token --with-decryption --region eu-north-1
+   aws ssm get-parameter --name /lambda-example/dev/auth-token --with-decryption --region $REGION
    ```
 2. Ensure `Authorization: Bearer <token>` header is included (note: capital 'B' in Bearer)
 3. Check authorizer Lambda logs for errors:
    ```bash
    # Get authorizer function name
    AUTH_FUNC=$(aws cloudformation describe-stack-resources \
-     --stack-name lambda-example-dev --region eu-north-1 \
+     --stack-name lambda-example-dev --region $REGION \
      --query 'StackResources[?LogicalResourceId==`AuthorizerFunction`].PhysicalResourceId' \
      --output text)
    
    # View logs
-   aws logs tail /aws/lambda/$AUTH_FUNC --region eu-north-1 --since 5m
+   aws logs tail /aws/lambda/$AUTH_FUNC --region $REGION --since 5m
    ```
 4. Verify the token value doesn't have extra whitespace or quotes
 
@@ -1231,38 +1093,38 @@ sam logs --stack-name lambda-example-dev --tail
 
 # Or view logs directly (get function names from CloudFormation first)
 API_FUNC=$(aws cloudformation describe-stack-resources \
-  --stack-name lambda-example-dev --region eu-north-1 \
+  --stack-name lambda-example-dev --region $REGION \
   --query 'StackResources[?LogicalResourceId==`ApiFunction`].PhysicalResourceId' \
   --output text)
-aws logs tail /aws/lambda/$API_FUNC --region eu-north-1 --follow
+aws logs tail /aws/lambda/$API_FUNC --region $REGION --follow
 
 # Validate template
 sam validate
 
 # Delete stack (replace region as needed)
-aws cloudformation delete-stack --stack-name lambda-example-dev --region eu-north-1
+aws cloudformation delete-stack --stack-name lambda-example-dev --region $REGION
 
 # Wait for stack deletion
-aws cloudformation wait stack-delete-complete --stack-name lambda-example-dev --region eu-north-1
+aws cloudformation wait stack-delete-complete --stack-name lambda-example-dev --region $REGION
 
 # Delete SAM managed resources
-aws cloudformation delete-stack --stack-name aws-sam-cli-managed-default --region eu-north-1
+aws cloudformation delete-stack --stack-name aws-sam-cli-managed-default --region $REGION
 
 # Get stack outputs
-aws cloudformation describe-stacks --stack-name lambda-example-dev --region eu-north-1
+aws cloudformation describe-stacks --stack-name lambda-example-dev --region $REGION
 
 # Check stack events (troubleshooting)
-aws cloudformation describe-stack-events --stack-name lambda-example-dev --region eu-north-1
+aws cloudformation describe-stack-events --stack-name lambda-example-dev --region $REGION
 
 # List all stacks
-aws cloudformation list-stacks --region eu-north-1
+aws cloudformation list-stacks --region $REGION
 
 # Get API Gateway routes and their authorizers
 API_ID=$(aws cloudformation describe-stack-resources \
-  --stack-name lambda-example-dev --region eu-north-1 \
+  --stack-name lambda-example-dev --region $REGION \
   --query 'StackResources[?LogicalResourceId==`HttpApi`].PhysicalResourceId' \
   --output text)
-aws apigatewayv2 get-routes --api-id $API_ID --region eu-north-1
+aws apigatewayv2 get-routes --api-id $API_ID --region $REGION
 
 # Invoke function locally
 sam local invoke ApiFunction -e events/test-event.json
